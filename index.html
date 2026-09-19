@@ -97,7 +97,7 @@
 				box-shadow: 0 10px 26px -6px rgba(255, 153, 51, 0.45);
 			}
 			.login-icon svg { width: 24px; height: 24px; }
-			.login-card h1 { font-size: 19px; margin: 0 0 4px; letter-spacing: -0.2px; }
+			.login-card h1 { font-size: 50px; margin: 0 0 4px; letter-spacing: -0.2px; }
 			.login-card p.sub { margin: 0 0 24px; color: var(--muted-2); font-size: 13px; }
 			.login-card input {
 				width: 100%; background: rgba(243, 234, 217, 0.04); border: 1.5px solid var(--line);
@@ -136,7 +136,7 @@
 				display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 			}
 			.brand-icon svg { width: 16px; height: 16px; color: #1c1712; }
-			.brand-name { font-size: 13.5px; font-weight: 700; font-family: "Noto Sans Bengali", sans-serif; }
+			.brand-name { font-size: 31.5px; font-weight: 700; font-family: "Noto Sans Bengali", sans-serif; }
 			.brand-sub { font-size: 10.5px; color: var(--muted-2); margin-top: 1px; }
 
 			.logout-btn {
@@ -372,7 +372,6 @@
 					</div>
 					<div>
 						<div class="brand-name">জ্ঞনদা ভবন</div>
-						<!-- <div class="brand-sub" id="accountEmailText">--</div> -->
 					</div>
 				</div>
 				<div class="topbar-right">
@@ -407,6 +406,7 @@
 						<div class="wx-temp" id="wxTemp">--°</div>
 						<div class="wx-desc" id="wxDesc">Fetching weather</div>
 					</div>
+					
 				</div>
 				<div class="hero-strip">
 					<div class="hero-strip-item">
@@ -421,10 +421,9 @@
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M2 12h20" opacity="0"/><path d="M12 12a4 4 0 0 0-4 4M12 12a4 4 0 0 1 4 4M12 12V4" /></svg>
 						<span id="wxHum">Hum --%</span>
 					</div>
-
-					<div class="hero-strip-item corner-status" id="connCorner" title="Connection status" style="    margin-left: 15% !important;">
+					<div class="corner-status hero-strip-item" id="connCorner" title="Connection status" style="margin-left: 40px;">
 						<span class="corner-dot" id="connCornerDot"></span>
-					
+						<span id="connCornerText" style="display: none;">Offline</span>
 					</div>
 				</div>
 				<button class="hero-note-btn" id="wxRetry" style="display:none">Retry</button>
@@ -432,7 +431,6 @@
 
 			<div class="stage">
 				<div class="device-label">
-					<h2 class="device-name bn" id="deviceName">বাইরের লাইট</h2>
 					<div class="device-state" id="deviceState">
 						<span class="state-dot"></span>
 						<span id="deviceStateText">Loading…</span>
@@ -449,7 +447,7 @@
 						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" />
 						</svg>
-						Tap to toggle
+						<span id="plateFootText">Tap to toggle</span>
 					</div>
 				</div>
 
@@ -502,13 +500,17 @@
 			const deviceState = document.getElementById("deviceState");
 			const deviceStateText = document.getElementById("deviceStateText");
 			const lastChanged = document.getElementById("lastChanged");
-			const accountEmailText = document.getElementById("accountEmailText");
 			const connCornerDot = document.getElementById("connCornerDot");
+			const connCornerText = document.getElementById("connCornerText");
 
-			document.getElementById("deviceName").textContent = SWITCH_NAME;
-
+			// state.on holds the raw Firebase value. The relay is active-low,
+			// so raw false means the switch is physically ON.
 			let state = { on: false, loaded: false };
 			let connected = false;
+
+			function isPhysicallyOn() {
+				return !state.on;
+			}
 
 			function nowLabel() {
 				const d = new Date();
@@ -531,29 +533,34 @@
 			}
 
 			function renderSwitch() {
-				const showOn = connected && state.on;
+				const showOn = connected && isPhysicallyOn();
 				rocker.classList.toggle("on", showOn);
 				rocker.classList.toggle("loaded", state.loaded);
 				deviceState.classList.toggle("on", showOn);
 				rockerWell.classList.toggle("disabled", !connected);
+				const footText = document.getElementById("plateFootText");
 				if (!connected) {
 					deviceStateText.textContent = "Offline";
+					footText.textContent = "Reconnecting…";
+				} else if (!state.loaded) {
+					deviceStateText.textContent = "Loading…";
+					footText.textContent = "Loading…";
 				} else {
-					deviceStateText.textContent = state.loaded ? (state.on ? "ON" : "OFF") : "Loading…";
+					deviceStateText.textContent = showOn ? "ON" : "OFF";
+					footText.textContent = showOn ? "ON — tap to turn off" : "OFF — tap to turn on";
 				}
 			}
 
 			function setConnStatus(online) {
 				connected = online;
 				connCornerDot.classList.toggle("online", online);
+				connCornerText.textContent = online ? "Connected" : "Offline";
 				renderSwitch();
 			}
 
 			let dbRefAttached = false;
 
 			function startSwitchControl(user) {
-				accountEmailText.textContent = user && user.email ? user.email : allowedEmail;
-
 				const db = firebase.database();
 				setConnStatus(false);
 
