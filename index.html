@@ -730,6 +730,8 @@
 				}
 			}
 			document.getElementById("wxRetry").addEventListener("click", initWeather);
-		</script>
+		if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("./sw.js");
+}</script>
 	</body>
 </html>
