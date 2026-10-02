@@ -2,18 +2,16 @@ name: Firebase Switch Scheduler
 
 on:
   schedule:
-    # 05:30 AM IST → TRUE
+    # 05:30 AM IST → OFF → Firebase true
     - cron: "0 0 * * *"
 
-    # 05:30 PM IST → FALSE
+    # 05:30 PM IST → ON → Firebase false
     - cron: "0 12 * * *"
 
   workflow_dispatch:
 
 jobs:
-
-  switch-on:
-    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '0 0 * * *'
+  switch-control:
     runs-on: ubuntu-latest
 
     steps:
@@ -28,29 +26,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Set Switch1 TRUE
-        run: node update-firebase.js true
-        env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-
-
-  switch-off:
-    if: github.event_name == 'schedule' && github.event.schedule == '0 12 * * *'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Set Switch1 FALSE
-        run: node update-firebase.js false
+      - name: Set Firebase Switch
+        run: |
+          if [ "${{ github.event.schedule }}" = "0 0 * * *" ]; then
+            node update-firebase.js true
+          elif [ "${{ github.event.schedule }}" = "0 12 * * *" ]; then
+            node update-firebase.js false
+          else
+            echo "Manual run - setting OFF"
+            node update-firebase.js true
+          fi
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
