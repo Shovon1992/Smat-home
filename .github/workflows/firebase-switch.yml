@@ -3,10 +3,8 @@ name: Firebase Switch Scheduler
 on:
   schedule:
     # 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 IST
-    # GitHub Actions uses UTC
     - cron: "30 0,3,6,9,12,15 * * *"
 
-  # Allows manual testing from GitHub
   workflow_dispatch:
 
 jobs:
@@ -21,7 +19,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
 
       - name: Install dependencies
         run: npm install
