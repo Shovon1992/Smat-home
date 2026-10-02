@@ -1,20 +1,14 @@
 const admin = require("firebase-admin");
 
 async function main() {
-  // Check Firebase secret
   if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-    throw new Error(
-      "FIREBASE_SERVICE_ACCOUNT GitHub Secret is missing."
-    );
+    throw new Error("FIREBASE_SERVICE_ACCOUNT secret is missing.");
   }
 
-  // Get value from command line
   const value = process.argv[2];
 
   if (value !== "true" && value !== "false") {
-    throw new Error(
-      `Invalid value: ${value}. Expected true or false.`
-    );
+    throw new Error("Value must be true or false.");
   }
 
   const serviceAccount = JSON.parse(
@@ -35,14 +29,20 @@ async function main() {
     .set(switchValue);
 
   console.log(
-    `SUCCESS: /Switch1 changed to ${switchValue}`
+    `Firebase /Switch1 = ${switchValue}`
+  );
+
+  console.log(
+    switchValue
+      ? "Physical switch: OFF"
+      : "Physical switch: ON"
   );
 
   await admin.app().delete();
 }
 
 main().catch((error) => {
-  console.error("ERROR:");
+  console.error("Firebase update failed:");
   console.error(error);
   process.exit(1);
 });
