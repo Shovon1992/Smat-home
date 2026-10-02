@@ -14,10 +14,14 @@ async function updateSwitch() {
 
   let switchValue;
 
-  if ([0, 6, 12].includes(hour)) {
+  if (hour === 0) {
+    // 5:30 AM IST
     switchValue = true;
-  } else {
+  } else if (hour === 12) {
+    // 5:30 PM IST
     switchValue = false;
+  } else {
+    throw new Error(`Unexpected execution time: ${hour}:00 UTC`);
   }
 
   await admin
@@ -25,7 +29,7 @@ async function updateSwitch() {
     .ref("/Switch1")
     .set(switchValue);
 
-  console.log(`Switch1 = ${switchValue}`);
+  console.log(`Switch1 changed to: ${switchValue}`);
 }
 
 updateSwitch()
