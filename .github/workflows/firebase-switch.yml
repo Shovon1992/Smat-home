@@ -1,0 +1,32 @@
+name: Firebase Switch Scheduler
+
+on:
+  schedule:
+    # 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 IST
+    # GitHub Actions uses UTC
+    - cron: "30 0,3,6,9,12,15 * * *"
+
+  # Allows manual testing from GitHub
+  workflow_dispatch:
+
+jobs:
+  update-switch:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Update Firebase Switch1
+        run: npm run update
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
