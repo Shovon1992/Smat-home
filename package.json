@@ -1,0 +1,11 @@
+{
+  "name": "firebase-switch-scheduler",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "update": "node update-firebase.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.2"
+  }
+}
