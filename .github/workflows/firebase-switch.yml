@@ -2,8 +2,11 @@ name: Firebase Switch Scheduler
 
 on:
   schedule:
-    # 06:00, 09:00, 12:00, 15:00, 18:00, 21:00 IST
-    - cron: "30 0,3,6,9,12,15 * * *"
+    # 5:30 AM IST → Switch1 TRUE
+    - cron: "0 0 * * *"
+
+    # 5:30 PM IST → Switch1 FALSE
+    - cron: "0 12 * * *"
 
   workflow_dispatch:
 
@@ -23,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Update Firebase Switch1
+      - name: Update Firebase
         run: npm run update
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
