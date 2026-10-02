@@ -1,40 +1,48 @@
 const admin = require("firebase-admin");
 
-const serviceAccount = JSON.parse(
-  process.env.FIREBASE_SERVICE_ACCOUNT
-);
-
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://my-home-3608f-default-rtdb.firebaseio.com"
-});
-
-async function updateSwitch() {
-  const hour = new Date().getUTCHours();
-
-  let switchValue;
-
-  if (hour === 0) {
-    // 5:30 AM IST
-    switchValue = true;
-  } else if (hour === 12) {
-    // 5:30 PM IST
-    switchValue = false;
-  } else {
-    throw new Error(`Unexpected execution time: ${hour}:00 UTC`);
+async function main() {
+  // Check Firebase secret
+  if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+    throw new Error(
+      "FIREBASE_SERVICE_ACCOUNT GitHub Secret is missing."
+    );
   }
+
+  // Get value from command line
+  const value = process.argv[2];
+
+  if (value !== "true" && value !== "false") {
+    throw new Error(
+      `Invalid value: ${value}. Expected true or false.`
+    );
+  }
+
+  const serviceAccount = JSON.parse(
+    process.env.FIREBASE_SERVICE_ACCOUNT
+  );
+
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL:
+      "https://my-home-3608f-default-rtdb.firebaseio.com"
+  });
+
+  const switchValue = value === "true";
 
   await admin
     .database()
     .ref("/Switch1")
     .set(switchValue);
 
-  console.log(`Switch1 changed to: ${switchValue}`);
+  console.log(
+    `SUCCESS: /Switch1 changed to ${switchValue}`
+  );
+
+  await admin.app().delete();
 }
 
-updateSwitch()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error("Firebase update failed:", error);
-    process.exit(1);
-  });
+main().catch((error) => {
+  console.error("ERROR:");
+  console.error(error);
+  process.exit(1);
+});
