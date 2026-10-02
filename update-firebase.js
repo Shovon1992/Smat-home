@@ -12,22 +12,20 @@ admin.initializeApp({
 async function updateSwitch() {
   const hour = new Date().getUTCHours();
 
-  // Scheduled IST times:
-  // 06:00 -> true
-  // 09:00 -> false
-  // 12:00 -> true
-  // 15:00 -> false
-  // 18:00 -> true
-  // 21:00 -> false
+  let switchValue;
 
-  const switchValue = [0, 6, 12].includes(hour);
+  if ([0, 6, 12].includes(hour)) {
+    switchValue = true;
+  } else {
+    switchValue = false;
+  }
 
   await admin
     .database()
     .ref("/Switch1")
     .set(switchValue);
 
-  console.log(`Switch1 changed to: ${switchValue}`);
+  console.log(`Switch1 = ${switchValue}`);
 }
 
 updateSwitch()
